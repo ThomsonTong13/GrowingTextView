@@ -14,11 +14,9 @@
 
 @interface ViewController () <IMGrowingTextViewDelegate>
 {
-    BOOL        _isKeyboardShowing;                     //键盘是否处于弹起状态，当键盘未弹起状态时，需要重置输入框到屏幕最下方，即调用reset方法
-
-    BOOL        _isKeypathObserversAdded;               //kvo是否已经注册，防止二次注册导致事件发次发生的问题以及多次remove导致崩溃的问题
-
-    BOOL        _isKeyboardObserversAdded;              //键盘监听事件是否已经添加，防止二次添加以致事件发生多次的问题
+    BOOL        _isKeyboardShowing;
+    BOOL        _isKeypathObserversAdded;
+    BOOL        _isKeyboardObserversAdded;
 
     UIButton    *_backButton;
 
@@ -37,33 +35,7 @@
 {
     [super viewDidLoad];
 
-    //下边的输入框
-    {
-        CGRect rect4TextView = CGRectMake(0,
-                                          self.view.frame.size.height - kHeight4GrowingInputView,
-                                          self.view.frame.size.width,
-                                          kHeight4GrowingInputView);
-
-        _isKeyboardObserversAdded = NO;
-
-        _textView = [[GrowingTextView alloc] initWithFrame:rect4TextView];
-
-        _textView.delegate = self;
-        _textView.targetView = self.view;
-        _textView.placeholder = @"";
-        _textView.clipsToBounds = YES;
-        _textView.returnKeyType = UIReturnKeySend;
-        _textView.isNoShowVoiceBtn = NO;
-
-        [self.view addSubview:_textView];
-
-        _backButton = [[UIButton alloc] initWithFrame:self.view.frame];
-        _backButton.backgroundColor = [UIColor clearColor];
-
-        [_backButton addTarget:self
-                        action:@selector(removeKeyboard)
-              forControlEvents:UIControlEventTouchUpInside];
-    }
+    [self.view addSubview:self.textView];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -79,21 +51,12 @@
 
     [self removeKeyboardObservers];
 
-    self.enable = NO;
-
     if (_isKeyboardShowing)
     {
         _isKeyboardShowing = NO;
 
         [_textView reset];
     }
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-
-    [_textView reset];
 }
 
 - (void)dealloc
@@ -115,14 +78,6 @@
     _isKeyboardShowing = YES;
 
     return YES;
-}
-
-- (void)imGrowingTextView:(GrowingTextView *)textView willChangeHeight:(CGFloat)height
-{
-}
-
-- (void)imGrowingTextView:(GrowingTextView *)textView hasBeenResetWhetherVoiceButtonWasTapped:(BOOL)tapped
-{
 }
 
 - (void)imGrowingTextViewWillStandWithoutKeyboardPoppingUp:(GrowingTextView *)textView
@@ -153,15 +108,6 @@
     }
 
     return NO;
-}
-
-//发送gif表情
-- (void)imGrowingTextView:(GrowingTextView *)textView
-             gifImageName:(NSString *)imagename
-               andGifType:(NSString *)type
-                andENName:(NSString *)ENname
-                andZHName:(NSString *)ZHname
-{
 }
 
 - (void)imGrowingTextView:(GrowingTextView *)textView
@@ -199,22 +145,6 @@ toAddOrRemoveKeyboardObservers:(BOOL)shouldAdd
 
         _cancelKey = YES;
     }
-}
-
-- (void)willRecordingVoiceWithImGrowingTextView
-{
-    self.enable = YES;
-}
-
-//语音发送
-- (void)imGrowingTextView:(GrowingTextView *)textView didFinishRecordingVoiceWithDataVO:(id)audioDataVO
-{
-    //构建语音消息并发送
-    self.enable = NO;
-}
-
-- (void)imGrowingTextViewWillSendLocation:(GrowingTextView *)textView
-{
 }
 
 - (void)pushImageView:(GrowingTextView *)textView
@@ -345,6 +275,39 @@ toAddOrRemoveKeyboardObservers:(BOOL)shouldAdd
 
         [_textView reset];
     }
+}
+
+#pragma mark - Getters and Setters
+
+- (GrowingTextView *)textView
+{
+    if (!_textView)
+    {
+        CGRect rect4TextView = CGRectMake(0,
+                                          self.view.frame.size.height - kHeight4GrowingInputView,
+                                          self.view.frame.size.width,
+                                          kHeight4GrowingInputView);
+
+        _isKeyboardObserversAdded = NO;
+
+        _textView = [[GrowingTextView alloc] initWithFrame:rect4TextView];
+
+        _textView.delegate = self;
+        _textView.targetView = self.view;
+        _textView.placeholder = @"";
+        _textView.clipsToBounds = YES;
+        _textView.returnKeyType = UIReturnKeySend;
+        _textView.isNoShowVoiceBtn = NO;
+
+        _backButton = [[UIButton alloc] initWithFrame:self.view.frame];
+        _backButton.backgroundColor = [UIColor clearColor];
+
+        [_backButton addTarget:self
+                        action:@selector(removeKeyboard)
+              forControlEvents:UIControlEventTouchUpInside];
+    }
+
+    return _textView;
 }
 
 @end

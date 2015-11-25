@@ -10,7 +10,5 @@
 
 @interface ViewController : UIViewController
 
-@property (nonatomic) BOOL enable;
-
 @end
 
